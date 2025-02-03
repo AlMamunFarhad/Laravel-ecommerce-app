@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -11,20 +13,65 @@ class ShopController extends Controller
     {
         $page = $request->query('page');
         $size = $request->query('size');
-        if(!$page){
+        if (!$page)
             $page = 1;
-        }     
-        if(!$size){
-            $size = 12; 
+        if (!$size)
+            $size = 12;
+        $order = $request->query('order');
+        if (!$order)
+            $order = -1;
+        $column = "";
+        $orderList = "";
+        switch ($order) {
+            case 1:
+                $column = 'created_at';
+                $orderList = 'DESC';
+                break;
+            case 2:
+                $column = 'created_at';
+                $orderList = 'ASC';
+                break;
+            case 3:
+                $column = 'regular_price';
+                $orderList = 'ASC';
+                break;
+            case 4:
+                $column = 'regular_price';
+                $orderList = 'DESC';
+                break;
+            default:
+                $column = 'id';
+                $orderList = 'DESC';
         }
-        $products = Product::orderByDesc('created_at')->paginate($size);
-        return view('shop',['products' => $products, 'page'=> $page, 'size'=>$size]);
+        $brands = Brand::orderBy('name')->get();
+        $brand_checkbox = $request->query('brands');
+        $categories = Category::orderBy('name','ASC')->get();
+        $q_categories = $request->query('categories');
+        $prange = $request->query('prange');
+        if(!$prange)
+            $prange = "0,500";
+        $from = explode(',', $prange)[0];
+        $to = explode(',', $prange)[1];
+        $products = Product::where(function($query) use ($brand_checkbox) {
+            if ($brand_checkbox) {
+                $query->whereIn('brand_id', explode(',', $brand_checkbox))->orWhereRaw("'".$brand_checkbox."' = ''");
+            }
+        })->
+        where(function($query) use ($q_categories) {
+            if ($q_categories) {
+                $query->whereIn('category_id', explode(',', $q_categories))->orWhereRaw("'".$q_categories."' = ''");
+            }
+        })
+        ->whereBetween('regular_price', array($from, $to))
+        ->orderByDesc('created_at')->orderBy($column, $orderList)->paginate($size);
+
+        return view('shop', ['products' => $products, 'page' => $page, 'size' => $size, 'order' => $order, 'brands' => $brands, 'brand_checkbox' => $brand_checkbox,'categories' => $categories, 'q_categories' => $q_categories, 'from' => $from, 'to' => $to]);
     }
 
     public function productsDetails($slug)
     {
-        $product = Product::where('slug',$slug)->first();
+        $product = Product::where('slug', $slug)->first();
         $slide_products = Product::where('slug', '!=', $slug)->inRandomOrder('id')->take(8)->get();
-        return view('product-details',['product'=> $product, 'slide_products' => $slide_products]);
+        return view('product-details', ['product' => $product, 'slide_products' => $slide_products]);
     }
 }
