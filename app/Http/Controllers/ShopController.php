@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Cart;
 
 class ShopController extends Controller
 {
@@ -65,13 +66,19 @@ class ShopController extends Controller
         ->whereBetween('regular_price', array($from, $to))
         ->orderByDesc('created_at')->orderBy($column, $orderList)->paginate($size);
 
-        return view('shop', ['products' => $products, 'page' => $page, 'size' => $size, 'order' => $order, 'brands' => $brands, 'brand_checkbox' => $brand_checkbox,'categories' => $categories, 'q_categories' => $q_categories, 'from' => $from, 'to' => $to]);
+        return view('shop', ['products' => $products, 'page' => $page, 'size' => $size, 'order' => $order, 'brands' => $brands, 'brand_checkbox' => $brand_checkbox,'categories' => $categories, 'q_categories' => $q_categories, 'from' => $from, 'to' => $to,'prange' => $prange]);
     }
-
     public function productsDetails($slug)
     {
         $product = Product::where('slug', $slug)->first();
         $slide_products = Product::where('slug', '!=', $slug)->inRandomOrder('id')->take(8)->get();
         return view('product-details', ['product' => $product, 'slide_products' => $slide_products]);
+    }
+
+    public function getCartAndWishlistCount()
+    {
+        $cart_item_count = Cart::instance('cart')->content()->count();
+        $wishlist_count = Cart::instance('wishlist')->content()->count();
+        return response()->json(['status'=>200,'cart_item_count' => $cart_item_count, 'wishlist_count' => $wishlist_count]);
     }
 }
