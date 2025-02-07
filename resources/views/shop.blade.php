@@ -366,10 +366,6 @@
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    {{-- <a href="javascript:void(0)" onclick="addProductToWishlist({{ $product->id }},'{{ $product->name }}',1,{{ $product->regular_price }});" class="wishlist"> --}}
-                                                    {{-- <a href="javascript:void(0)" onclick="addProductToWishlist({{ $product->id, $product->name,1,$product->regular_price }});" class="wishlist">
-                                                <i data-feather="heart"></i>
-                                            </a> --}}
                                                     <a href="javascript:void(0)"
                                                         onclick="addProductToWishlist('{{ $product->id }}', '{{ $product->name }}', 1, '{{ $product->regular_price }}');"
                                                         class="wishlist">
@@ -539,8 +535,8 @@
                 url: "{{ route('cart.wishlist.count') }}",
                 success: function(response) {
                     if (response.status == 200) {
-                        $("#cart-count").html(response.cartCount);
-                        $("#wishlist-count").html(response.wishlistCount);
+                        $("#cart-count").html(response.cart_item_count);
+                        $("#wishlist-count").html(response.wishlist_count);
                     }
                 }
             });

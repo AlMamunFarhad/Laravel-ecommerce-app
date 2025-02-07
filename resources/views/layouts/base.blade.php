@@ -158,7 +158,7 @@
                                     </li>
                                     <li class="onhover-dropdown wislist-dropdown">
                                         <div class="cart-media">
-                                            <a href="wishlist/list.html">
+                                            <a href="{{ route('wishlist.products') }}">
                                                 <i data-feather="heart"></i>
                                                 <span id="wishlist-count" class="label label-theme rounded-pill">
                                                     {{ Cart::instance('wishlist')->content()->count() }}
