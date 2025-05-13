@@ -10,6 +10,7 @@ use Cart;
 
 class ShopController extends Controller
 {
+    // Filter products by brand, category, price range and order
     public function index(Request $request)
     {
         $page = $request->query('page');
@@ -68,13 +69,14 @@ class ShopController extends Controller
 
         return view('shop', ['products' => $products, 'page' => $page, 'size' => $size, 'order' => $order, 'brands' => $brands, 'brand_checkbox' => $brand_checkbox,'categories' => $categories, 'q_categories' => $q_categories, 'from' => $from, 'to' => $to,'prange' => $prange]);
     }
+    // Show product details
     public function productsDetails($slug)
     {
         $product = Product::where('slug', $slug)->first();
         $slide_products = Product::where('slug', '!=', $slug)->inRandomOrder('id')->take(8)->get();
         return view('product-details', ['product' => $product, 'slide_products' => $slide_products]);
     }
-
+    // Count cart and wishlist items
     public function getCartAndWishlistCount()
     {
         $cart_item_count = Cart::instance('cart')->content()->count();
